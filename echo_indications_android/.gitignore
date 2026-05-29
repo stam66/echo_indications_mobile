@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Signing keys — never commit. Keystore lives in ~/.android/keystores/ by default,
+# but exclude any *.jks / *.keystore / keystore.properties accidentally placed in the repo.
+*.jks
+*.keystore
+keystore.properties
