@@ -13,6 +13,7 @@ import org.heartimaging.echoindications.ui.IndicationDetailScreen
 import org.heartimaging.echoindications.ui.IndicationsListScreen
 import org.heartimaging.echoindications.ui.LandingScreen
 import org.heartimaging.echoindications.ui.LoginScreen
+import org.heartimaging.echoindications.ui.ReferencesScreen
 
 object Routes {
     const val LANDING = "landing"
@@ -23,6 +24,7 @@ object Routes {
     const val CDS_CHILD = "cds/{parentId}"
     const val LOGIN = "login"
     const val FEEDBACK = "feedback"
+    const val REFERENCES = "references"
 
     fun indicationDetail(id: Int) = "indications/$id"
     fun indicationEdit(id: Int) = "indications/$id/edit"
@@ -60,6 +62,9 @@ fun AppNavigation(auth: AuthManager) {
         }
         composable(Routes.FEEDBACK) {
             FeedbackScreen(auth = auth, nav = nav)
+        }
+        composable(Routes.REFERENCES) {
+            ReferencesScreen(nav = nav)
         }
     }
 }

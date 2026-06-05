@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.outlined.ChevronRight
@@ -129,6 +130,10 @@ fun LandingScreen(auth: AuthManager, nav: NavHostController) {
             onLoginClick = {
                 showAbout = false
                 nav.navigate(Routes.LOGIN)
+            },
+            onReferencesClick = {
+                showAbout = false
+                nav.navigate(Routes.REFERENCES)
             }
         )
     }
@@ -139,7 +144,8 @@ fun LandingScreen(auth: AuthManager, nav: NavHostController) {
 private fun AboutSheet(
     auth: AuthManager,
     onDismiss: () -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onReferencesClick: () -> Unit
 ) {
     val isAuthenticated by auth.isAuthenticated.collectAsState()
     val username by auth.username.collectAsState()
@@ -185,6 +191,22 @@ private fun AboutSheet(
 
                 SectionHeader("Sources")
                 Text("Indications are derived from publicly available guidance from the British Society of Echocardiography (BSE), the British Heart Valve Society (BHVS), the European Association of Cardiovascular Imaging (EACVI), and the American Society of Echocardiography (ASE), supplemented by expert consensus.")
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = onReferencesClick)
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.MenuBook,
+                        contentDescription = null,
+                        tint = NHSBlue,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("View references", color = NHSBlue, fontSize = 14.sp)
+                }
 
                 SectionHeader("Web")
                 Text("echoindications.org")

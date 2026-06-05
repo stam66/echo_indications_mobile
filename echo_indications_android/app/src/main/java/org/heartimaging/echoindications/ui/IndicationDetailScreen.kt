@@ -1,6 +1,7 @@
 package org.heartimaging.echoindications.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,14 +12,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -51,6 +56,7 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import org.heartimaging.echoindications.auth.AuthManager
 import org.heartimaging.echoindications.model.Indication
+import org.heartimaging.echoindications.model.References
 import org.heartimaging.echoindications.nav.Routes
 import org.heartimaging.echoindications.network.ApiClient
 import org.heartimaging.echoindications.ui.theme.AUCCanBeConsidered
@@ -172,7 +178,10 @@ fun IndicationDetailScreen(
                     )
                 }
                 indication != null -> {
-                    DetailForm(indication!!)
+                    DetailForm(
+                        indication!!,
+                        onOpenReferences = { nav.navigate(Routes.REFERENCES) }
+                    )
                 }
             }
         }
@@ -220,7 +229,7 @@ fun IndicationDetailScreen(
 }
 
 @Composable
-private fun DetailForm(ind: Indication) {
+private fun DetailForm(ind: Indication, onOpenReferences: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -257,10 +266,51 @@ private fun DetailForm(ind: Indication) {
             }
         }
 
-        // Sources
-        Section("Sources") {
-            Text(if (ind.sourceList.isEmpty()) "—" else ind.sourceList)
+        // Sources & references
+        Section("Sources & references") {
+            val hasSource = ind.sourceASE || ind.sourceEACVI || ind.sourceBSE ||
+                ind.sourceBHVS || ind.sourceConsensus
+            if (!hasSource) {
+                Text("—", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else {
+                if (ind.sourceASE) SourceNavRow("ase", onOpenReferences)
+                if (ind.sourceEACVI) SourceNavRow("eacvi", onOpenReferences)
+                if (ind.sourceBSE) SourceNavRow("bse", onOpenReferences)
+                if (ind.sourceBHVS) SourceNavRow("bhvs", onOpenReferences)
+                if (ind.sourceConsensus) {
+                    Column {
+                        Text("Consensus", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text(
+                            "Expert clinical consensus",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            HorizontalDivider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onOpenReferences),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.MenuBook,
+                    contentDescription = null,
+                    tint = NHSBlue,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("View all references", color = NHSBlue)
+            }
         }
+        Text(
+            "Tap a source to view the original publication(s).",
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+        )
 
         // Comments
         if (ind.comments.isNotEmpty()) {
@@ -318,5 +368,30 @@ private fun AUCRow(label: String, value: String?) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(label, modifier = Modifier.weight(1f))
         Text(pretty, color = colour, fontWeight = FontWeight.Medium)
+    }
+}
+
+@Composable
+private fun SourceNavRow(bodyKey: String, onClick: () -> Unit) {
+    val body = References.body(forKey = bodyKey) ?: return
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(body.acronym, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Text(
+                body.name,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Icon(
+            Icons.Outlined.ChevronRight,
+            contentDescription = null,
+            tint = NHSBlue.copy(alpha = 0.5f)
+        )
     }
 }
